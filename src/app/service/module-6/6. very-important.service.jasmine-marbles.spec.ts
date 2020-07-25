@@ -1,4 +1,5 @@
-import {asyncScheduler, of} from 'rxjs';
+import {asyncScheduler, of, scheduled} from 'rxjs';
+import {AsyncScheduler} from 'rxjs/internal/scheduler/AsyncScheduler';
 import {VeryImportantServiceTS} from '../mine_services/3. very-important.service.TestScheduler';
 import { getTestScheduler, cold } from 'jasmine-marbles';
 
@@ -15,6 +16,18 @@ xdescribe('Module 6: VeryImportantServiceTS (with jasmine-marbles)', () => {
   describe('getData (jasmine-marbles)', () => {
     it('should emit 3 values', () => {
 
+      AsyncScheduler.delegate = getTestScheduler();
+
+      const marbleValues = { a: 42 };
+      service.http = {
+        get: () => cold('(a|)', marbleValues),
+      };
+
+      const expectedObservable = cold('a-a-a-(a|)', marbleValues);
+      expect(service.getData(0.02)).toBeObservable(expectedObservable);
+
+      AsyncScheduler.delegate = null;
+
       // get TestScheduler instance from jasmine-mabrles with getTestScheduler()
       // assign instance to (asyncScheduler.constructor as any).delegate
       // mock service.http with 'cold'helper function
@@ -25,7 +38,7 @@ xdescribe('Module 6: VeryImportantServiceTS (with jasmine-marbles)', () => {
     });
   });
 
-  describe('watchTwoEmissions (jasmine-marbles)', () => {
+  xdescribe('watchTwoEmissions (jasmine-marbles)', () => {
     it('should merge values emissions', () => {
 
       // get TestScheduler instance from jasmine-mabrles with getTestScheduler()

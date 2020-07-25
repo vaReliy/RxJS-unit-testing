@@ -21,6 +21,15 @@ xdescribe('Module 3: VeryImportantService (with fakeAsync)', () => {
 
   describe('getRangeASAP', () => {
     it('should emit 4 specific values (fakeAsync)', fakeAsync(() => {
+      const range$ = service.getRangeASAP();
+      const result = [];
+
+      range$.subscribe(v => result.push(v));
+
+      tick(0);
+
+      expect(result).toEqual([0, 1, 2, 3]);
+
       // call service.getRangeASAP(30);
       // subscribe to result observable
       // grab all the values to array
@@ -32,6 +41,15 @@ xdescribe('Module 3: VeryImportantService (with fakeAsync)', () => {
 
   describe('getData', () => {
     it('should emit 3 specific values', fakeAsync(() => {
+
+      const range$ = service.getData(30); // 30 sec
+      const result = [];
+
+      range$.subscribe(v => result.push(v));
+
+      tick(60005); // 0  + 30sec + 30sec = 60 sec = 60000 ms + 5ms
+
+      expect(result).toEqual([42, 42, 42]);
       // call service.getData(30);
       // subscribe to result observable
       // grab all the values to array
@@ -50,8 +68,17 @@ xdescribe('Module 3: VeryImportantService (with fakeAsync)', () => {
         {value: {target: {value: 'aaa'}}, delay: 100},
         {value: {target: {value: 'aaab'}}, delay: 500},
         {value: {target: {value: 'aaabc'}}, delay: 2500},
-      ], true);
+      ], true); // [aaa, aaab, aaabc]
       service.http = {get: () => of('42', asyncScheduler)};
+
+      const search$ = service.getSearchResults(input$);
+      const result = [];
+
+      search$.subscribe(text => {
+        result.push(text);
+      });
+      tick(3500); // ms (more than 100+500+2500)
+      expect(result).toEqual(['42', '42']);
 
       // call service.getSearchResults(input$);
       // subscribe to result observable

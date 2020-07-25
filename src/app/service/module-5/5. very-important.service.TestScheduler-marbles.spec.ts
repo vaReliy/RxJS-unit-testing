@@ -1,6 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 
 import {asyncScheduler, of} from 'rxjs';
+import {AsyncScheduler} from 'rxjs/internal/scheduler/AsyncScheduler';
 import {TestScheduler} from 'rxjs/testing';
 import {HttpClient} from '@angular/common/http';
 import {VeryImportantServiceTS} from '../mine_services/3. very-important.service.TestScheduler';
@@ -20,12 +21,11 @@ xdescribe('Module-5: VeryImportantService - with TestScheduler', () => {
   });
 
   // marbles
-  describe('getData (TestScheduler with marbles)', () => {
+  xdescribe('getData (TestScheduler with marbles)', () => {
     it('should emit 3 values', () => {
       const assertion = (actual, expected) => {
         expect(actual).toEqual(expected);
       };
-
       // create TestScheduler instance
       // assign it to (asyncScheduler.constructor as any).delegate
       // mock service.http with scheduler.createColdObservable function
@@ -37,7 +37,7 @@ xdescribe('Module-5: VeryImportantService - with TestScheduler', () => {
     });
   });
 
-  describe('getRangeASAP (with trick and marbles)', () => {
+  xdescribe('getRangeASAP (with trick and marbles)', () => {
     it('should emit 4 specific values (with trick)', () => {
       const assertion = (actual, expected) => {
         expect(actual).toEqual(expected);
@@ -59,6 +59,19 @@ xdescribe('Module-5: VeryImportantService - with TestScheduler', () => {
       const assertion = (actual, expected) => {
         expect(actual).toEqual(expected);
       };
+
+      const scheduler = new TestScheduler(assertion);
+      AsyncScheduler.delegate = scheduler;
+
+      const marbleMock = { a: 42 };
+      service.searchStringChange$ = scheduler.createColdObservable( '--a--|', marbleMock);
+      service.paginationChange$ = scheduler.createColdObservable(   'b--|', marbleMock);
+      const expectedMarble =                                               'b-a--|';
+
+      scheduler.flush();
+      scheduler.expectObservable(service.watchTwoEmissions()).toBe(expectedMarble, marbleMock);
+
+      AsyncScheduler.delegate = null;
 
       // create TestScheduler instance
       // assign it to (asyncScheduler.constructor as any).delegate

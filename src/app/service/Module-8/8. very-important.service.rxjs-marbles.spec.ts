@@ -1,3 +1,4 @@
+import {cold} from 'jasmine-marbles';
 import {asyncScheduler, of} from 'rxjs';
 import {VeryImportantServiceTS} from '../mine_services/3. very-important.service.TestScheduler';
 import {cases, marbles, observe} from 'rxjs-marbles/jasmine';
@@ -17,7 +18,7 @@ xdescribe('Module 8: VeryImportantServiceTS (with rxjs-marbles)', () => {
     service = new VeryImportantServiceTS(mockHttp);
   });
 
-  describe('getRangeASAP (rxjs-marbles)', () => {
+  xdescribe('getRangeASAP (rxjs-marbles)', () => {
     it('should emit 4 specific values ',
       marbles((m) => {
         // we use 'marbles' from rxjs-mabrles to write tests
@@ -31,6 +32,15 @@ xdescribe('Module 8: VeryImportantServiceTS (with rxjs-marbles)', () => {
 
   describe('getData (rxjs-marbles with marbles)', () => {
     it('should emit 3 values', marbles((m) => {
+
+        const marbleValues = { a: 42 };
+        service.http = {
+          get: () => m.cold('(a|)', marbleValues),
+        };
+
+        // const expected = 'a 1000ms a 1000ms (a|)';
+        const expected = 'a 999ms a 999ms (a|)';
+        m.expect(service.getData(1)).toBeObservable(expected, marbleValues);
         // we use 'marbles' from rxjs-mabrles to write tests
         // mock service.http with m.cold function
         // compose expected marble string
@@ -42,7 +52,7 @@ xdescribe('Module 8: VeryImportantServiceTS (with rxjs-marbles)', () => {
   });
 
 
-  describe('getData (rxjs-marbles with cases)', () => {
+  xdescribe('getData (rxjs-marbles with cases)', () => {
 
     cases('should emit 3 value', (marble, caseData) => {
 
@@ -63,7 +73,7 @@ xdescribe('Module 8: VeryImportantServiceTS (with rxjs-marbles)', () => {
     });
   });
 
-  describe('(rxjs-marbles observe)', () => {
+  xdescribe('(rxjs-marbles observe)', () => {
 
     it('should call this.http.get twice and get result twice',
       observe(() => {

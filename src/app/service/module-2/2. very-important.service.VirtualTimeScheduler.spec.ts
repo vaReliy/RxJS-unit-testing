@@ -27,6 +27,10 @@ xdescribe('Module 2: VirtualTimeScheduler', () => {
       const range$ = service.getRangeASAP(scheduler);
       const result = [];
 
+      range$.subscribe(v => result.push(v));
+
+      scheduler.flush();
+      expect(result).toEqual([0, 1, 2, 3]);
       // subscribe to $range and add all values to array
       // then call scheduler.flush()
       // and then expect() to check result
@@ -42,6 +46,12 @@ xdescribe('Module 2: VirtualTimeScheduler', () => {
       const range$ = service.getData(30, scheduler);
       const result = [];
 
+      range$.subscribe(v => {
+        result.push(v);
+      });
+
+      scheduler.flush();
+      expect(result).toEqual([42, 42, 42]);
       // subscribe to $range and add all values to array
       // then call scheduler.flush()
       // and then expect() to check result
@@ -56,6 +66,11 @@ xdescribe('Module 2: VirtualTimeScheduler', () => {
 
       const range$ = service.watchTwoEmissions();
       const result = [];
+
+      range$.subscribe(v => result.push(v));
+
+      scheduler.flush();
+      expect(result).toEqual(['value1', 1]);
       // subscribe to $range and add all values to array
       // then call scheduler.flush()
       // and then expect() to check result

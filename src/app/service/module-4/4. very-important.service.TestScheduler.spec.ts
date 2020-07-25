@@ -1,6 +1,7 @@
 import {TestBed} from '@angular/core/testing';
 
 import {asyncScheduler, of} from 'rxjs';
+import {AsyncScheduler} from 'rxjs/internal/scheduler/AsyncScheduler';
 import {TestScheduler} from 'rxjs/testing';
 import {HttpClient} from '@angular/common/http';
 import {VeryImportantServiceTS} from '../mine_services/3. very-important.service.TestScheduler';
@@ -27,6 +28,15 @@ xdescribe('Module-4: VeryImportantService - with TestScheduler', () => {
       const scheduler = new TestScheduler(assertion);
       service.http = {get: () => of(42, scheduler)};
 
+      scheduler.maxFrames = Number.POSITIVE_INFINITY; // <== 'maxFrames' - important param!
+      const data$ = service.getData(30, scheduler);
+      const result = [];
+
+      data$.subscribe(v => result.push(v));
+
+      scheduler.flush();
+      expect(result).toEqual([42, 42, 42]);
+
       // create TestScheduler instance = new TestScheduler(assertion);
       // set scheduler.maxFrames to Infinity
       // call the function service.getData(30, scheduler);
@@ -44,7 +54,23 @@ xdescribe('Module-4: VeryImportantService - with TestScheduler', () => {
         expect(actual).toEqual(expected);
       };
       const scheduler = new TestScheduler(assertion);
-      (asyncScheduler as any).constructor.delegate = scheduler;
+      // AsyncScheduler.delegate = scheduler;
+      // (asyncScheduler as any).constructor.delegate = null;
+
+      const range$ = service.getRangeASAP(scheduler);
+      const result = [];
+
+      range$.subscribe(v => {
+        result.push(v);
+        console.log('subscribe:', v, result); // fixme
+      });
+
+      console.log('result arr:', result); // fixme
+      scheduler.flush();
+      // expect(result).toEqual([]); // fixme: wrong expectation
+      expect(result).toEqual([0, 1, 2, 3]);
+      // AsyncScheduler.delegate = null;
+      // (asyncScheduler as any).constructor.delegate = null;
 
       // create TestScheduler instance = new TestScheduler(assertion);
       // call the function service.getRangeASAP()
